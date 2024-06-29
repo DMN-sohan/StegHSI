@@ -204,7 +204,7 @@ def main():
 
     total_steps = len(files_list) // args.batch_size + 1
     global_step = 0
-
+    print("\n\nStarting Training\n\n")
     while global_step < args.num_steps:
         times = []
         for _ in range(min(total_steps, args.num_steps - global_step)):
