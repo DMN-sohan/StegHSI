@@ -77,7 +77,7 @@ def lpips(input0, input1, model='net-lin', net='alex', version=0.1):
             break
 
     with open(os.path.join(cache_dir, pb_fname), 'rb') as f:
-        graph_def = tf.GraphDef()
+        graph_def = tf.compat.v1.GraphDef()
         graph_def.ParseFromString(f.read())
         _ = tf.import_graph_def(graph_def,
                                 input_map={input0_name: input0, input1_name: input1})
