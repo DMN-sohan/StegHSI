@@ -294,7 +294,7 @@ def main():
                 body += loss_values
 
                 times = []
-
+                print(body)
                 send_email(subject, body, to_email, from_email, smtp_server, smtp_port, login, password)
 
             if global_step % 10000 == 0:
