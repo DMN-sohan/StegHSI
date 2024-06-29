@@ -1,6 +1,5 @@
 def main():
-  !git clone https://github.com/DMN-sohan/StegHSI.git
-  %cd StegHSI
+  
   !pip install -r requirements.txt
   !kaggle datasets download -d matteocastrignano/mirflickr
   import zipfile
