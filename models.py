@@ -33,7 +33,7 @@ class StegaStampEncoder(Layer):
 
     def call(self, inputs):
         secret, image = inputs
-        image = tfa.image.rgb_to_hsv(image)
+        image = tf.image.rgb_to_hsv(image)
         secret = secret - .5
         image = image - .5
 
@@ -62,7 +62,7 @@ class StegaStampEncoder(Layer):
         conva = self.conv9(merge9)
         conv10 = self.conv10(conv9)
         residual = self.residual(conv9)
-        residual = tfa.image.hsv_to_rgb(residual)
+        residual = tf.image.hsv_to_rgb(residual)
         return residual
 
 class StegaStampDecoder(Layer):
@@ -97,12 +97,12 @@ class StegaStampDecoder(Layer):
         ])
 
     def call(self, image):
-        image = tfa.image.rgb_to_hsv(image)
+        image = tf.image.rgb_to_hsv(image)
         image = image - .5
         stn_params = self.stn_params(image)
         x = tf.matmul(stn_params, self.W_fc1) + self.b_fc1
         transformed_image = stn_transformer(image, x, [self.height, self.width, 3])
-        transformed_image = tfa.image.hsv_to_rgb(transformed_image)
+        transformed_image = tf.image.hsv_to_rgb(transformed_image)
         return self.decoder(transformed_image)
 
 class Discriminator(Layer):
