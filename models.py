@@ -33,6 +33,7 @@ class StegaStampEncoder(Layer):
 
     def call(self, inputs):
         secret, image = inputs
+        image = tfa.image.rgb_to_hsv(image)
         secret = secret - .5
         image = image - .5
 
@@ -61,6 +62,7 @@ class StegaStampEncoder(Layer):
         conva = self.conv9(merge9)
         conv10 = self.conv10(conv9)
         residual = self.residual(conv9)
+        residual = tfa.image.hsv_to_rgb(residual)
         return residual
 
 class StegaStampDecoder(Layer):
@@ -95,10 +97,12 @@ class StegaStampDecoder(Layer):
         ])
 
     def call(self, image):
+        image = tfa.image.rgb_to_hsv(image)
         image = image - .5
         stn_params = self.stn_params(image)
         x = tf.matmul(stn_params, self.W_fc1) + self.b_fc1
         transformed_image = stn_transformer(image, x, [self.height, self.width, 3])
+        transformed_image = tfa.image.hsv_to_rgb(transformed_image)
         return self.decoder(transformed_image)
 
 class Discriminator(Layer):
@@ -197,9 +201,6 @@ def build_model(encoder,
                 args,
                 global_step):
 
-    #HSI
-    image_input = tfa.image.rgb_to_hsv(image_input)
-    
     input_warped = tfa.image.transform(image_input, M[:,1,:], interpolation='BILINEAR')
     mask_warped = tfa.image.transform(tf.ones_like(input_warped), M[:,1,:], interpolation='BILINEAR')
     input_warped += (1-mask_warped) * image_input
@@ -207,9 +208,6 @@ def build_model(encoder,
     residual_warped = encoder((secret_input, input_warped))
     encoded_warped = residual_warped + input_warped
     residual = tfa.image.transform(residual_warped, M[:,0,:], interpolation='BILINEAR')
-
-    #HSV
-    residual = tfa.image.rgb_to_hsv(residual)
 
     if borders == 'no_edge':
         encoded_image = image_input + residual

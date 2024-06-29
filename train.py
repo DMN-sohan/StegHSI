@@ -148,7 +148,7 @@ def main():
     tf.compat.v1.disable_eager_execution()
 
     secret_pl = tf.compat.v1.placeholder(shape=[None, args.secret_size], dtype=tf.float32, name="input_prep")
-    # Here we hardcode expacted image placeholder tensor shape with height and width
+    # Here we hardcode expected image placeholder tensor shape with height and width
     image_pl = tf.compat.v1.placeholder(shape=[None, height, width, 3], dtype=tf.float32, name="input_hide")
     M_pl = tf.compat.v1.placeholder(shape=[None, 2, 8], dtype=tf.float32, name="input_transform")
     global_step_tensor = tf.Variable(0, trainable=False, name='global_step')
