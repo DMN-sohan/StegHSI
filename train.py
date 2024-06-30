@@ -13,7 +13,7 @@ import pytz
 import datetime
 import argparse
 
-TRAIN_PATH = './dataset/'
+TRAIN_PATH = './data/'
 LOGS_Path = "./logs/"
 CHECKPOINTS_PATH = './checkpoints/'
 SAVED_MODELS = './new_models/'
