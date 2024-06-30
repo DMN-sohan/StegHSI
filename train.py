@@ -8,55 +8,15 @@ import utils
 import models
 from os.path import join
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
 import time
 import pytz
 import datetime
+import argparse
 
-TRAIN_PATH = './data/'
+TRAIN_PATH = './dataset/'
 LOGS_Path = "./logs/"
 CHECKPOINTS_PATH = './checkpoints/'
 SAVED_MODELS = './new_models/'
-
-subject = "Email from Kaggle"
-body = ""
-to_email = "gundojusohan@gmail.com"
-from_email = "sohang3113@gmail.com"
-smtp_server = "smtp.gmail.com"
-smtp_port = 587
-login = "sohang3113@gmail.com"
-password = "NahosVCE051"
-
-def send_email(subject, body, to_email, from_email, smtp_server, smtp_port, login, password):
-    try:
-        # Set up the server
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Secure the connection
-
-        # Login to the email account
-        server.login(login, password)
-
-        # Create the email object
-        msg = MIMEMultipart()
-        msg['From'] = from_email
-        msg['To'] = to_email
-        msg['Subject'] = subject
-
-        # Attach the email body
-        msg.attach(MIMEText(body, 'plain'))
-
-        # Send the email
-        server.sendmail(from_email, to_email, msg.as_string())
-
-        # Disconnect from the server
-        server.quit()
-
-        print("Email sent successfully!")
-    except Exception as e:
-        pass
 
 if not os.path.exists(CHECKPOINTS_PATH):
     os.makedirs(CHECKPOINTS_PATH)
@@ -87,8 +47,7 @@ def get_img_batch(files_list,
 
 
 def main():
-    import argparse
-    import time
+
     print(tf.test.is_gpu_available())
     start = time.time()
     parser = argparse.ArgumentParser()
@@ -209,7 +168,7 @@ def main():
         times = []
         for _ in range(min(total_steps, args.num_steps - global_step)):
 
-            start = time.time()
+            start_step = time.time()
 
             no_im_loss = global_step < args.no_im_loss_steps
             images, secrets = get_img_batch(files_list=files_list,
@@ -245,8 +204,8 @@ def main():
                     sess.run([train_dis_op, clip_D], feed_dict)
 
             if global_step % 1 == 0:
-                stop = time.time()
-                times.append(stop-start)
+                stop_step = time.time()
+                times.append(stop_step-start_step)
 
             if global_step % 100 == 0:
                 summary, global_step = sess.run([summary_op, global_step_tensor], feed_dict)
@@ -290,12 +249,11 @@ def main():
                 eta_str = eta.strftime('%Y-%m-%d %H:%M:%S %Z')
 
                 body = f"Time: {current_time_str} \nCurrent Step: {global_step}/{args.num_steps} | Step Time: {step_time:.2f}s | ETA: {eta_days}d {eta_hours}h {eta_minutes}m {eta_seconds}s (ETA Time of the Day: {eta_str})"
-                loss_values = f"\ntransformer/rnd_tran: {rnd_tran}, \nloss_scales/l2_loss_scale: {l2_loss_scale}, \nloss_scales/lpips_loss_scale: {lpips_loss_scale}, \nloss_scales/secret_loss_scale: {secret_loss_scale}, \nloss_scales/y_scale: {args.y_scale}, \nloss_scales/u_scale: {args.u_scale}, \nloss_scales/v_scale: {args.v_scale}, \nloss_scales/G_loss_scale: {G_loss_scale}, \nloss_scales/L2_edge_gain: {l2_edge_gain}"
+                loss_values = f"\n\ntransformer/rnd_tran: {rnd_tran}, \nloss_scales/l2_loss_scale: {l2_loss_scale}, \nloss_scales/lpips_loss_scale: {lpips_loss_scale}, \nloss_scales/secret_loss_scale: {secret_loss_scale}, \nloss_scales/y_scale: {args.y_scale}, \nloss_scales/u_scale: {args.u_scale}, \nloss_scales/v_scale: {args.v_scale}, \nloss_scales/G_loss_scale: {G_loss_scale}, \nloss_scales/L2_edge_gain: {l2_edge_gain}\n\n"
                 body += loss_values
 
-                times = []
+                times.clear()
                 print(body)
-                send_email(subject, body, to_email, from_email, smtp_server, smtp_port, login, password)
 
             if global_step % 10000 == 0:
                 save_path = saver.save(sess, join(CHECKPOINTS_PATH, EXP_NAME, EXP_NAME + ".chkp"),

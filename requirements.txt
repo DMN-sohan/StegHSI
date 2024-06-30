@@ -5,4 +5,4 @@ pillow>=5.4.1
 stn>=1.0.1
 tensorflow==2.8.0
 tensorflow-addons==0.17.1
-secure-smtplib
+pytz
