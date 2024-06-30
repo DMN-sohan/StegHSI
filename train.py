@@ -165,7 +165,6 @@ def main():
     global_step = 0
     print("\n\nStarting Training\n\n")
     while global_step < args.num_steps:
-        times = []
         for _ in range(min(total_steps, args.num_steps - global_step)):
 
             start_step = time.time()
@@ -203,10 +202,6 @@ def main():
                 if not args.no_gan:
                     sess.run([train_dis_op, clip_D], feed_dict)
 
-            if global_step % 1 == 0:
-                stop_step = time.time()
-                times.append(stop_step-start_step)
-
             if global_step % 100 == 0:
                 summary, global_step = sess.run([summary_op, global_step_tensor], feed_dict)
                 writer.add_summary(summary, global_step)
@@ -229,8 +224,8 @@ def main():
                 writer.add_summary(summary, global_step)
 
             if global_step % 1000 == 0:
-
-                step_time = sum(times)/len(times)
+                stop_step = time.time()
+                step_time = stop_step-start_step
                 remaining_steps = args.num_steps - global_step
                 estimated_time = remaining_steps * step_time
                 eta_days = int(estimated_time // (24 * 3600))
@@ -252,7 +247,6 @@ def main():
                 loss_values = f"\n\ntransformer/rnd_tran: {rnd_tran}, \nloss_scales/l2_loss_scale: {l2_loss_scale}, \nloss_scales/lpips_loss_scale: {lpips_loss_scale}, \nloss_scales/secret_loss_scale: {secret_loss_scale}, \nloss_scales/y_scale: {args.y_scale}, \nloss_scales/u_scale: {args.u_scale}, \nloss_scales/v_scale: {args.v_scale}, \nloss_scales/G_loss_scale: {G_loss_scale}, \nloss_scales/L2_edge_gain: {l2_edge_gain}\n\n"
                 body += loss_values
 
-                times.clear()
                 print(body)
 
             if global_step % 10000 == 0:
